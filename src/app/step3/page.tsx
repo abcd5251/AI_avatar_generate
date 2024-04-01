@@ -1,54 +1,52 @@
 "use client"
-import React, { useState } from 'react';
-import { ShineAPI } from '../utils/backend';
+import React, { useState, useEffect } from 'react';
+import { BackendAPI } from '../utils/backend';
 import { useRouter } from 'next/navigation';
 
-const sleep = (milliseconds: number): Promise<void> => {
-    return new Promise(resolve => setTimeout(resolve, milliseconds));
+const sleep = (milliseconds) => {
+  return new Promise(resolve => setTimeout(resolve, milliseconds));
 };
 
-const Step3: React.FC = () => {
-    const [text, setText] = useState<string>('');
-    const [resultText, setResultText] = useState<string>('');
-    const [loading, setLoading] = useState<boolean>(false);
-    const [resultGenerated, setResultGenerated] = useState<boolean>(false);
-    const router = useRouter();
-  
-    const handleGenerateClick = async () => {
-        setLoading(true);
-        
-        await sleep(2000)
-        try {
-            
-            await ShineAPI.summarize({ content: text, language: "1" })
-            .then((response) => {
+const Step4: React.FC = () => {
+  const [loading, setLoading] = useState<boolean>(false);
+  const [generateAudio, setGenerateAudio] = useState<boolean>(false);
+  const [finishGenerate, setFinishGenerate] = useState<boolean>(false);
+  const [saveAudioFile, setSaveAudioFile] = useState<string | null>(null);
+  const [content, setContent] = useState('輸入你想讓AI Avatar 講的話');
+  const [gender, setGender] = useState<string>('1');
+  const router = useRouter();
 
-                const summarizedResult = response.data;
-                const resultString = summarizedResult.data;
+  const handleGenerateAudio = async () => {
+    setGenerateAudio(true);
+  };
+
+  const handleStartGenerating = async () => {
+    setLoading(true);
     
-                setResultText(resultString);
-                setResultGenerated(true);
-            })
-            .catch((error) => {
-                console.error('Error in Summarization:', error);
-            });
-    
-        } catch (error) {
-          console.error('Error generating result:', error);
-    
-        } finally {
-          setLoading(false);
-        }
-    };
-  
-    const handleSkipClick = () => {
-        router.push('/step4');
-    };
-  
-    return (
-        <html lang="en">
-          <body className="bg-gray-900 text-white h-screen flex flex-col justify-center items-center">
-            <style>{`
+    try {
+        const url = await BackendAPI.generateAudio({ content, gender });
+        setSaveAudioFile(url);
+    } catch (error) {
+        console.error('Error generating audio:', error);
+    } finally {
+        setFinishGenerate(true);
+        setLoading(false);
+    }
+  };
+
+  const handleSaveAndNextClick = () => {
+    router.push('/step4');
+  };
+
+  return (
+    <html lang="en">
+      <head>
+        <meta charSet="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Audio</title>
+        <script src="https://cdn.tailwindcss.com"></script>
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet" />
+        <style>{`
             body {
               font-family: 'Inter', sans-serif;
             }
@@ -59,87 +57,81 @@ const Step3: React.FC = () => {
               margin-left: 0px;
             }
           `}</style>
-            <div className="flex flex-row justify-between items-start w-full px-10">
-              {/* Left Box */}
-              <div className="w-1/4 ml-1 mt-60">
-                <ul className="space-y-2">
-                  <img src="/logo.png" alt="Logo" className="logo" />
-                  <li>Step 1: Start</li>
-                  <li>Step 2: Avatar Image</li>
-                  <li className="bg-blue-500 text-white px-4 py-2 rounded-md">Step 3: Content</li>
-                  <li>Step 4: Audio</li>
-                  <li>Step 5: Preview</li>
-                </ul>
-              </div>
-              
-              {/* Main Content */}
-              <div className="flex justify-center items-center h-screen">
-                <div className="flex flex-col md:flex-row items-center space-y-8 md:space-y-0 md:space-x-12">
-                  {/* Left Box Content */}
-                  <div className="flex flex-col items-center">
-                    <h2 className="text-white text-2xl mb-2">Your text</h2>
-                    <p className="text-gray-400 mb-4">Put your content here.</p>
-                    <div>
-                        <textarea
-                            className="border-4 border-blue text-black bg-white w-full h-full rounded-lg p-2"
-                            value={text}
-                            onChange={(e) => setText(e.target.value)}
-                            style={{ width: '300px', height: '400px' }}
-                        />
-                    </div>
-                  </div>
-    
-                  {/* Generate Button */}
-                  <button
-                    className="bg-blue-500 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-                    type="button"
-                    onClick={handleGenerateClick}
-                  >
-                    Generate
-                  </button>
-    
-                  {/* Right Box Content */}
-                  <div className="flex flex-col items-center">
-                    <h2 className="text-white text-2xl mb-2">Result</h2>
-                    {loading ? (
-                  <div className="animate-spin h-5 w-5 border-t-2 border-b-2 border-blue-500 mx-auto my-4"></div>
-                ) : (
-                  <div>
-                    <p className="text-gray-400 mb-4">You may adjust it in the text box.</p>
-                    <div>
-                      <textarea
-                        className="border-4 border-blue text-black bg-white w-full h-full rounded-lg p-2"
-                        value={resultText}
-                        onChange={(e) => setResultText(e.target.value)}
-                        style={{ width: '300px', height: '400px' }}
-                      />
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* Conditional Rendering for Skip or Next Button */}
-              {resultGenerated ? (
+      </head>
+      <body className="bg-gray-900 text-white h-screen flex flex-col justify-center items-center">
+        <div className="flex flex-row justify-between items-start w-full px-10">
+          <div className="w-1/4">
+            <ul className="space-y-2">
+              <img src="/logo.png" alt="Logo" className="logo" />
+              <li>Step 1: Start</li>
+              <li>Step 2: Avatar Image</li>
+              <li className="bg-blue-500 text-white px-4 py-2 rounded-md">Step 3: Audio</li>
+              <li>Step 4: Preview</li>
+            </ul>
+          </div>
+          <div className="w-3/4 flex flex-col items-center">
+            <h3 className="text-6xl font-bold mb-8">Audio Preparation</h3>
+            <p className="text-gray-400 mb-8">type your script for AI</p>
+            {!generateAudio ? (
+              <div className="mt-4">
+                <textarea
+                  value={content}
+                  onChange={(e) => setContent(e.target.value)}
+                  placeholder="Enter content"
+                  className="bg-gray-800 text-white px-4 py-2 rounded-md mb-4 h-24 resize-none"
+                />
                 <button
-                  className="bg-transparent text-white font-semibold py-2 px-4 border border-white rounded focus:outline-none focus:shadow-outline"
-                  type="button"
-                  onClick={handleSkipClick}
+                  className="bg-blue-600 text-white font-semibold py-2 px-6 rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
+                  onClick={handleGenerateAudio}
                 >
-                  Next <i className="fas fa-chevron-right ml-2"></i>
+                  Enter your script
                 </button>
-              ) : (
-                <div>
-                <p className="text-gray-400 mb-2">Skip If you already have audio file</p>
+              </div>
+            ) : (
+              <div className="mt-4">
+                <label className="text-white mr-4">Male</label>
+                <input
+                  type="radio"
+                  name="gender"
+                  value="2"
+                  checked={gender === '2'}
+                  onChange={() => setGender('2')}
+                />
+                <label className="text-white ml-4">Female</label>
+                <input
+                  type="radio"
+                  name="gender"
+                  value="1"
+                  checked={gender === '1'}
+                  onChange={() => setGender('1')}
+                />
                 <button
-                  className="bg-transparent text-white font-semibold py-2 px-4 border border-white rounded focus:outline-none focus:shadow-outline"
-                  type="button"
-                  onClick={handleSkipClick}
+                  className="bg-blue-600 text-white font-semibold py-2 px-6 rounded mt-2 ml-2 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
+                  onClick={handleStartGenerating}
                 >
-                  Skip <i className="fas fa-chevron-right ml-2"></i>
+                  Generate Audio
                 </button>
-                </div>
-              )}
-            </div>
+              </div>
+            )}
+            {loading ? (
+              <div className="animate-spin h-5 w-5 border-t-2 border-b-2 border-blue-500 mx-auto my-4"></div>
+            ) : finishGenerate && !loading ?(
+              <div>
+                {!!saveAudioFile && <audio controls>
+                  <source src={saveAudioFile} type="audio/mpeg" />
+                  Your browser does not support the audio element.
+                </audio>}
+                <p className="text-gray-400 mb-8">Finish generated</p>
+                <button
+                  className="bg-blue-600 text-white font-semibold py-2 px-6 rounded mt-2 ml-2 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
+                  onClick={handleSaveAndNextClick}
+                >
+                  Next
+                </button>
+              </div>
+            ) : (
+              <div></div>
+            )}
           </div>
         </div>
       </body>
@@ -147,4 +139,4 @@ const Step3: React.FC = () => {
   );
 };
 
-export default Step3;
+export default Step4;

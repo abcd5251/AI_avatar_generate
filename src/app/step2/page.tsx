@@ -86,9 +86,8 @@ const Step2: React.FC = () => {
               <img src="/logo.png" alt="Logo" className="logo" />
               <li>Step 1: Start</li>
               <li className="bg-blue-500 text-white px-4 py-2 rounded-md">Step 2: Avatar Image</li>
-              <li>Step 3: Content</li>
-              <li>Step 4: Audio</li>
-              <li>Step 5: Preview</li>
+              <li>Step 3: Audio</li>
+              <li>Step 4: Preview</li>
             </ul>
           </div>
           <div className="w-3/4 flex flex-col items-center">
