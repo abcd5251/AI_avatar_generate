@@ -1,7 +1,7 @@
 "use client"
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { ShineAPI } from '../utils/backend';
+import { BackendAPI } from '../utils/backend';
 
 const sleep = (milliseconds: number): Promise<void> => {
   return new Promise(resolve => setTimeout(resolve, milliseconds));
@@ -22,7 +22,7 @@ const Step2: React.FC = () => {
       const formData = new FormData();
       formData.append('file', selectedFile);
   
-      await ShineAPI.avatarWithType({ type: '1', file: selectedFile})
+      await BackendAPI.avatarWithPrompt({ prompt: userInput, file: selectedFile})
         .then((result: File) => {
           console.log(result);
           setGeneratedImage(URL.createObjectURL(result));
