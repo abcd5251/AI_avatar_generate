@@ -1,6 +1,6 @@
 "use client"
 import React, { useState } from 'react';
-import { ShineAPI } from '../utils/shine';
+import { ShineAPI } from '../utils/backend';
 import { useRouter } from 'next/navigation';
 
 const sleep = (milliseconds: number): Promise<void> => {
